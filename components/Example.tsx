@@ -34,6 +34,21 @@ export default function Example() {
   const [rawQuery, setRawQuery] = React.useState('')
   const query = rawQuery.toLowerCase().replace(/^[#>]/, '')
 
+  const [data, setData] = React.useState<APIResponse>({ items: [] })
+
+  React.useEffect(() => {
+    fetch(`/api/search?q=${query}`).then(async (res) => {
+      if (res.ok) {
+        const data: APIResponse = await res.json()
+        setData(data)
+        console.log(data)
+      } else {
+        console.error('Failed to fetch data')
+      }
+    })
+
+  }, [rawQuery])
+
   return (
     <Transition.Root
       show={open}
@@ -92,9 +107,9 @@ export default function Example() {
                       Repositories
                     </h2>
                     <ul className="-mx-4 mt-2 text-sm text-gray-700 space-y-0.5">
-                      <RepositoryOption />
-                      <RepositoryOption />
-                      <RepositoryOption />
+                      {data.items.map((repository) =>
+                        <RepositoryOption name={repository.name} full_name={repository.full_name} owner={repository.owner} language={repository.language} stargazers_count={repository.stargazers_count} open_issues_count={repository.open_issues_count} forks_count={repository.forks_count} />
+                      )}
                     </ul>
                   </li>
                 </Combobox.Options>
